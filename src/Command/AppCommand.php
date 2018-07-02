@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Service\Game\CsvCache;
+use App\Service\Game\Game;
 use App\Service\IO\Console;
 use App\Service\IO\Memory;
 use Symfony\Component\Console\Command\Command;
@@ -24,7 +25,11 @@ class AppCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         Console::set($input, $output);
+
+        Console::title("Welcome!");
+
         Memory::report();
+        Game::version();
 
         if ($automate = $input->getArgument('automate')) {
             Console::setAuto();
@@ -33,8 +38,6 @@ class AppCommand extends Command
         }
 
         // show menu
-        Console::title("Menu");
-
         $choice = Console::choice([
             'Check local CSV cache',
             'Check SaintCoinach version',

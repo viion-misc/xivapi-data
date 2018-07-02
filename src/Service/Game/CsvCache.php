@@ -4,6 +4,8 @@ namespace App\Service\Game;
 
 use App\Service\IO\Console;
 use App\Service\IO\Download;
+use App\Service\IO\Memory;
+use App\Service\IO\Timer;
 
 class CsvCache
 {
@@ -30,16 +32,22 @@ class CsvCache
                 return;
             }
 
-            Console::text("Version: <comment>{$ex->version}</comment>");
+            // Save version
             self::save('/json/ex.json', json_encode($ex));
+            Game::version();
 
+            // download each CSV file
             Console::text("Downloading ". count($ex->sheets) ." CSV files ...");
+            Timer::start();
             foreach ($ex->sheets as $sheet) {
                 self::save(
                     "/csv/{$sheet->sheet}.csv",
                     Download::csv($sheet->sheet)
                 );
             }
+
+            Console::text("Completed: ". Timer::stop(true));
+            Memory::report();
         }
     }
 
@@ -59,5 +67,18 @@ class CsvCache
             self::FOLDER . $filename,
             $data
         );
+    }
+
+    /**
+     * Load a file
+     */
+    public static function load($filename)
+    {
+        if (!file_exists(self::FOLDER . $filename)) {
+            Console::text("File does not exist: ". $filename);
+            return false;
+        }
+
+        return file_get_contents(self::FOLDER . $filename);
     }
 }
