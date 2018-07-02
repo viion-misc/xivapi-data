@@ -9,16 +9,18 @@ use App\Service\IO\Timer;
 
 class CsvCache
 {
-    const FOLDER = __DIR__.'/resources/CsvCache';
+    const FOLDER = __DIR__.'/Resources/CsvCache';
+
+    private static $files = [];
 
     public static function verify()
     {
-        Console::title(__CLASS__);
+        Console::text("Verify game files ...");
 
         $files = array_diff(scandir(self::FOLDER), ['.','..','.gitkeep']);
 
         if (!empty($files)) {
-            Console::text('CsvCache contains files.');
+            Console::text('CsvCache Ready');
             return;
         }
 
@@ -34,6 +36,7 @@ class CsvCache
 
             // Save version
             self::save('/json/ex.json', json_encode($ex));
+            self::save('/json/ex.original.json', json_encode($ex));
             Game::version();
 
             // download each CSV file
@@ -46,8 +49,7 @@ class CsvCache
                 );
             }
 
-            Console::text("Completed: ". Timer::stop(true));
-            Memory::report();
+            Console::text("Completed: ". Timer::stop(true) .' - '. Memory::report(true));
         }
     }
 
@@ -74,11 +76,22 @@ class CsvCache
      */
     public static function load($filename)
     {
+        // return instanced version
+        if (isset(self::$files[$filename])) {
+            return self::$files[$filename];
+        }
+
+        // check exists
         if (!file_exists(self::FOLDER . $filename)) {
             Console::text("File does not exist: ". $filename);
             return false;
         }
 
-        return file_get_contents(self::FOLDER . $filename);
+        // load
+        $data = file_get_contents(self::FOLDER . $filename);
+
+        // instance cached
+        self::$files[$filename] = $data;
+        return $data;
     }
 }

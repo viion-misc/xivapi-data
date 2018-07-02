@@ -54,6 +54,17 @@ class Console
     }
 
     /**
+     * write a section heading
+     */
+    public static function section($section)
+    {
+        $section  = str_pad("[ {$section} ]", 50, '-', STR_PAD_BOTH);
+        self::$io->text([
+            '', "<fg=yellow>-{$section}-</>", ''
+        ]);
+    }
+
+    /**
      * write a nice title
      */
     public static function title($title)

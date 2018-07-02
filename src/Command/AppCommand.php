@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Service\Game\CsvCache;
 use App\Service\Game\Game;
+use App\Service\Game\GameBuildPre;
 use App\Service\IO\Console;
 use App\Service\IO\Memory;
 use Symfony\Component\Console\Command\Command;
@@ -61,6 +62,8 @@ class AppCommand extends Command
 
                 case 1:
                     CsvCache::verify();
+                    GameBuildPre::process();
+                    break;
             }
         }
     }
