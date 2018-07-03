@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Service\Game;
-
-use App\Service\IO\Console;
-use App\Service\IO\Download;
-use App\Service\IO\Memory;
-use App\Service\IO\Timer;
+namespace App\Service\IO;
 
 class CsvCache
 {
-    const FOLDER = __DIR__.'/Resources/CsvCache';
+    const FOLDER = __DIR__ . '/Resources/CsvCache';
 
     private static $files = [];
 
-    public static function verify()
+    /**
+     * Look for a local cache of CSV data, if one does not exist, download it.
+     */
+    public static function check()
     {
         Console::text("Verify game files ...");
 
@@ -26,18 +24,7 @@ class CsvCache
 
         // request to download csv files
         if (Console::isAuto() || Console::confirm("Download the latest CSV files from GitHub?")) {
-            $ex = Download::ex();
-
-            // issue downloading json
-            if (json_last_error()) {
-                Console::error(json_last_error_msg());
-                return;
-            }
-
-            // Save version
-            self::save('/json/ex.json', json_encode($ex));
-            self::save('/json/ex.original.json', json_encode($ex));
-            Game::version();
+            $ex = self::getExJson();
 
             // download each CSV file
             Console::text("Downloading ". count($ex->sheets) ." CSV files ...");
@@ -45,12 +32,32 @@ class CsvCache
             foreach ($ex->sheets as $sheet) {
                 self::save(
                     "/csv/{$sheet->sheet}.csv",
-                    Download::csv($sheet->sheet)
+                    Http::csv($sheet->sheet)
                 );
             }
 
             Console::text("Completed: ". Timer::stop(true) .' - '. Memory::report(true));
         }
+    }
+
+    /**
+     * Download ex.json
+     */
+    public static function getExJson()
+    {
+        $ex = Http::ex();
+
+        // issue downloading json
+        if (json_last_error()) {
+            throw new \Exception("Could not download ex.json file, reason: ". json_last_error_msg());
+        }
+
+        // Save version
+        self::save('/json/ex.json', json_encode($ex));
+        self::save('/json/ex.original.json', json_encode($ex));
+        Game::version();
+
+        return $ex;
     }
 
     /**
