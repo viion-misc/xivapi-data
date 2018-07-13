@@ -2,10 +2,8 @@
 
 namespace App\Command;
 
-use App\Service\Game\Csv;
-use App\Service\Game\Ex;
-use App\Service\IO\Console;
-use App\Service\IO\Memory;
+use App\Service\Game\SaintCoinach;
+use App\Service\Tools\Tools;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,31 +11,39 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AppCommand extends Command
 {
+    private $Tools;
+    
+    public function __construct(?string $name = null)
+    {
+        parent::__construct($name);
+        
+        $this->Tools = new Tools();
+    }
+    
     protected function configure()
     {
         $this
             ->setName('xiv')
             ->setDescription('Run the XIV Web Tools')
-            ->addArgument('automate', InputArgument::OPTIONAL, 'Automate actions, eg: 1,3,5,2');
+            ->addArgument('auto', InputArgument::OPTIONAL, 'Automate actions, eg: 1,3,5,2');
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        Console::set($input, $output);
-        Console::title("Welcome!");
-        Memory::report();
+        Tools::Console()->set($input, $output)->title('Welcome');
+        Tools::Console()->text( Tools::Memory()->report() );
 
-        // if we're in auto mode, gogogog.
-        if ($automate = $input->getArgument('automate')) {
-            Console::setAuto();
+        // if we're in auto mode.
+        if ($automate = $input->getArgument('auto')) {
             $this->handle(str_getcsv($automate));
             return;
         }
 
         // show menu
-        $choice = Console::choice([
-            'Warm-up (Check ex.json, check CSV cache)',
+        $choice = Tools::Console()->choice([
+            'Download SaintCoinach.Cmd',
+            'Run SaintCoinach.Cmd CSV Extraction (Slow)',
         ]);
 
         $this->handle([ $choice ]);
@@ -51,17 +57,17 @@ class AppCommand extends Command
         foreach ($choices as $choice){
             switch ($choice) {
                 default:
-                    Console::error("No available command for option: {$choice}");
+                    Tools::Console()->error("There is no available command for the menu option: {$choice}");
                     break;
 
                 case 1:
-                    // check ex.json file
-                    $version = (new Ex())->getVersion();
-                    Console::text("Game Version: <info>{$version}</info>");
-
-                    // check CSV cache
-                    (new Csv());
-
+                    Tools::Console()->title('SaintCoinach Download');
+                    (new SaintCoinach())->download();
+                    break;
+                    
+                case 2:
+                    Tools::Console()->title('CSV Extraction');
+                    (new SaintCoinach())->extract('allrawexd');
                     break;
             }
         }

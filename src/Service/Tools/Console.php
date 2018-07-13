@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\IO;
+namespace App\Service\Tools;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -9,96 +9,85 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class Console
 {
     /** @var SymfonyStyle */
-    private static $io;
-    /** @var bool */
-    private static $auto = false;
+    private $io;
 
     /**
      * Set the console class;
      */
-    public static function set(InputInterface $input, OutputInterface $output)
+    public function set(InputInterface $input, OutputInterface $output)
     {
-        self::$io = new SymfonyStyle($input, $output);
-    }
-
-    /**
-     * Set CLI as automatic
-     */
-    public static function setAuto()
-    {
-        self::$auto = true;
-    }
-
-    /**
-     * Is CLI in auto mode?
-     */
-    public static function isAuto()
-    {
-        return self::$auto;
+        $this->io = new SymfonyStyle($input, $output);
+        return $this;
     }
 
     /**
      * write some tet
      */
-    public static function text($text)
+    public function text($text)
     {
-        self::$io->text($text);
+        $this->io->text($text);
+        return $this;
     }
 
     /**
      * write an error
      */
-    public static function error($text)
+    public function error($text)
     {
-        self::$io->error($text);
+        $this->io->error($text);
+        die;
     }
 
     /**
      * write a section heading
      */
-    public static function section($section)
+    public function section($section)
     {
         $section  = str_pad("[ {$section} ]", 50, '-', STR_PAD_BOTH);
-        self::$io->text([
+        $this->io->text([
             '', "<fg=yellow>-{$section}-</>", ''
         ]);
+        
+        return $this;
     }
 
     /**
      * write a nice title
      */
-    public static function title($title)
+    public function title($title)
     {
         $bar     = str_pad('', 50, '-', STR_PAD_LEFT);
         $titleA  = str_pad(getenv('APP_NAME'), 50, ' ', STR_PAD_BOTH);
         $titleB  = str_pad($title, 50, ' ', STR_PAD_BOTH);
 
-        self::$io->text([
+        $this->io->text([
             "<fg=yellow>+{$bar}+</>",
             "<fg=yellow>|{$titleA}|</>",
             "<fg=yellow>|{$titleB}|</>",
             "<fg=yellow>+{$bar}+</>",
             ''
         ]);
+        
+        return $this;
     }
 
     /**
      * Show a choice menu
      */
-    public static function choice($list)
+    public function choice($list)
     {
         foreach ($list as $i => $line) {
-            self::$io->text("<info>". ($i+1) ."</info> - {$line}");
+            $this->io->text("<info>". ($i+1) ."</info> - {$line}");
         }
 
-        return self::$io->ask('Please pick an option');
+        return $this->io->ask('Please pick an option');
     }
 
     /**
      * Ask to confirm something
      */
-    public static function confirm($text)
+    public function confirm($text)
     {
-        return self::$io->confirm($text);
+        return $this->io->confirm($text);
     }
 }
