@@ -24,6 +24,29 @@ class FileManager
     {
         return file_exists($filename);
     }
+
+    public function compress($data): string
+    {
+        $data = serialize($data);
+        $data = gzdeflate($data, 9);
+        $data = gzdeflate($data, 9);
+        return $data;
+    }
+
+    public function decompress($data): string
+    {
+        $data = gzinflate($data);
+        $data = gzinflate($data);
+        $data = unserialize($data);
+        return $data;
+    }
+
+    public function createDirectory(string $directory)
+    {
+        if (!is_dir($directory)) {
+            mkdir($directory, 0775, true);
+        }
+    }
     
     public function listDirectory(string $directory): array
     {

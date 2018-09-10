@@ -105,7 +105,7 @@ class SaintCoinach
     }
 
     /**
-     * Get correct extraction versions
+     * Fetch or render the Saint version information
      */
     public function versions($return = false)
     {
@@ -155,5 +155,17 @@ class SaintCoinach
             "Extract Date:      {$versions->FolderTimestamp}",
             ""
         ]);
+    }
+
+    /**
+     * Fetch or render the Saint ex.json file
+     */
+    public function sheets(): array
+    {
+        if (!file_exists(self::ROOT .'/App/ex.json')) {
+            Tools::Console()->error('SaintCoinach extract not found, missing file: '. self::ROOT .'/App/ex.json');
+        }
+
+        return json_decode(file_get_contents(self::ROOT .'/App/ex.json'))->sheets;
     }
 }

@@ -54,11 +54,7 @@ class Console
      */
     public function section($section)
     {
-        $section  = str_pad("[ {$section} ]", 50, '-', STR_PAD_BOTH);
-        $this->io->text([
-            '', "<fg=yellow>-{$section}-</>", ''
-        ]);
-        
+        $this->io->text([ "<fg=magenta>:: {$section} ::</>", '' ]);
         return $this;
     }
 

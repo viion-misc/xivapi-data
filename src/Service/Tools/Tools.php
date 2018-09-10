@@ -14,8 +14,8 @@ class Tools
     private static $Memory;
     /** @var Timer */
     private static $Timer;
-    /** @var CSV */
-    private static $CSV;
+    /** @var SaintCsv */
+    private static $SaintCsv;
     
     public static function Console(): Console
     {
@@ -62,12 +62,12 @@ class Tools
         return self::$Timer;
     }
 
-    public static function CSV(): CSV
+    public static function SaintCsv(): SaintCsv
     {
-        if (!self::$CSV) {
-            self::$CSV = new CSV();
+        if (!self::$SaintCsv) {
+            self::$SaintCsv = new SaintCsv();
         }
 
-        return self::$CSV;
+        return self::$SaintCsv;
     }
 }

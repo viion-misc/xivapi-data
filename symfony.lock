@@ -20,6 +20,9 @@
             "ref": "343a54894c535b6ef0d1a297f543793b3852ea9d"
         }
     },
+    "league/csv": {
+        "version": "9.1.4"
+    },
     "nesbot/carbon": {
         "version": "1.31.1"
     },

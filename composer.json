@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "knplabs/github-api": "^2.8",
+        "league/csv": "^9.1",
         "nesbot/carbon": "^1.31",
         "php-http/guzzle6-adapter": "^1.1",
         "symfony/console": "^4.1",
