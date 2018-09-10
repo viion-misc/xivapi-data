@@ -4,8 +4,6 @@ namespace App\Service\Tools;
 
 class Tools
 {
-    const ROOT = __DIR__.'\\..\\..\\..\\data';
-    
     /** @var Console */
     private static $Console;
     /** @var Download */
@@ -16,6 +14,8 @@ class Tools
     private static $Memory;
     /** @var Timer */
     private static $Timer;
+    /** @var CSV */
+    private static $CSV;
     
     public static function Console(): Console
     {
@@ -60,5 +60,14 @@ class Tools
         }
         
         return self::$Timer;
+    }
+
+    public static function CSV(): CSV
+    {
+        if (!self::$CSV) {
+            self::$CSV = new CSV();
+        }
+
+        return self::$CSV;
     }
 }

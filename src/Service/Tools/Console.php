@@ -30,11 +30,22 @@ class Console
     }
 
     /**
-     * write an error
+     * write a error
      */
     public function error($text)
     {
         $this->io->error($text);
+        die;
+    }
+
+    /**
+     * write a notice
+     */
+    public function notice($text)
+    {
+        $this->io->text([
+            "<fg=red>! NOTICE: {$text}</>", ''
+        ]);
         die;
     }
 
@@ -56,16 +67,9 @@ class Console
      */
     public function title($title)
     {
-        $bar     = str_pad('', 50, '-', STR_PAD_LEFT);
-        $titleA  = str_pad(getenv('APP_NAME'), 50, ' ', STR_PAD_BOTH);
-        $titleB  = str_pad($title, 50, ' ', STR_PAD_BOTH);
-
+        $title = str_pad("---[ {$title} ]", 100, '-', STR_PAD_RIGHT);
         $this->io->text([
-            "<fg=yellow>+{$bar}+</>",
-            "<fg=yellow>|{$titleA}|</>",
-            "<fg=yellow>|{$titleB}|</>",
-            "<fg=yellow>+{$bar}+</>",
-            ''
+            "<fg=yellow>{$title}</>", ''
         ]);
         
         return $this;

@@ -2,7 +2,8 @@
 
 namespace App\Command;
 
-use App\Service\Game\SaintCoinach;
+use App\Service\Game\GameData;
+use App\Service\Github\SaintCoinach;
 use App\Service\Tools\Tools;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -42,8 +43,14 @@ class AppCommand extends Command
 
         // show menu
         $choice = Tools::Console()->choice([
-            'Download SaintCoinach.Cmd',
-            'Run SaintCoinach.Cmd CSV Extraction (Slow)',
+            'SaintCoinach: Download - This will delete any existing download',
+            'SaintCoinach: allrawexd - Extract all game data (slow)',
+            'SaintCoinach: Version check - check the version against extract folders',
+
+            // data
+            'GameData: Pre-Build - Preps the game data for data build, must be done before Post-Build',
+            'GameData: Post-Build - Automatically build game data into documents based on SaintCoinach Ex.JSON',
+            'GameData: Custom-Build - Run through a series of custom scripts that extend or modify game data',
         ]);
 
         $this->handle([ $choice ]);
@@ -61,13 +68,33 @@ class AppCommand extends Command
                     break;
 
                 case 1:
-                    Tools::Console()->title('SaintCoinach Download');
+                    Tools::Console()->title('SaintCoinach: Download');
                     (new SaintCoinach())->download();
                     break;
                     
                 case 2:
-                    Tools::Console()->title('CSV Extraction');
+                    Tools::Console()->title('SaintCoinach: allrawexd');
                     (new SaintCoinach())->extract('allrawexd');
+                    break;
+
+                case 3:
+                    Tools::Console()->title('SaintCoinach: Version check');
+                    (new SaintCoinach())->versions();
+                    break;
+
+                case 4:
+                    Tools::Console()->title('GameData: Pre-Build');
+                    (new GameData())->PreBuild();
+                    break;
+
+                case 5:
+                    Tools::Console()->title('GameData: Post-Build');
+                    (new GameData())->PostBuild();
+                    break;
+
+                case 6:
+                    Tools::Console()->title('GameData: Custom-Build');
+                    (new GameData())->CustomBuild();
                     break;
             }
         }
