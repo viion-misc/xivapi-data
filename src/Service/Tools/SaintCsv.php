@@ -16,7 +16,7 @@ class SaintCsv
         'Singular'   => 'Name',
         'Masculine'  => 'Name',
         'Feminine'   => 'NameFemale',
-        'Id'         => 'TextFile',
+        'Id'         => 'File',
     ];
 
     /**
@@ -45,7 +45,7 @@ class SaintCsv
     ];
 
     /**
-     * get CSV data
+     * Returns a class document with the CSV data
      */
     public function get(string $filename): \stdClass
     {
@@ -57,75 +57,93 @@ class SaintCsv
         $locale   = file_exists("{$filename}.en.csv");
         $filename = $locale ? "{$filename}.en.csv" : "{$filename}.csv";
 
-        // get CSV data
-        $csv = Reader::createFromPath($filename);
+        // create sheet
+        $sheet = (Object)[
+            'Filename'          => basename($filename),
+            'HasLocale'         => $locale,
+            'OffsetToColumn'    => [],
+            'Columns'           => [],
+            'Documents'         => [],
+            'Total'             => 0,
+        ];
 
-        // parse CSV headers
+        $csv      = Reader::createFromPath($filename);
         $columns  = (new Statement())->offset(1)->limit(1)->process($csv)->fetchOne();
         $types    = (new Statement())->offset(2)->limit(1)->process($csv)->fetchOne();
-        $data     = [];
 
-        // rename any 'str' to _en
+        // refactor columns
+        $columns = $this->refactorColumns($columns);
+
+        // store columns against type
         foreach ($columns as $i => $col) {
-            if ($types[$i] === 'str') {
-                $columns[$i] = "{$col}_en";
-            }
+            // ignore non-named columns
+            if (empty($col)) continue;
+
+            $type = $types[$i];
+            $col  = $type == 'str' ? "{$col}_en" : $col;
+
+            // save column with its type
+            $sheet->OffsetToColumn[$i] = $col;
+            $sheet->Columns[$col] = (Object)[
+                'Name' => $col,
+                'Type' => $type
+            ];
+        }
+
+        // grab translated CSVs
+        $translations = [
+            'de' => null,
+            'fr' => null,
+            'ja' => null,
+        ];
+
+        foreach (array_keys($translations) as $language) {
+            $translations[$language] = iterator_to_array(
+                (new Statement())->offset(3)->process(
+                    Reader::createFromPath(str_ireplace('.en', ".{$language}", $filename))
+                )->getRecords()
+            );
         }
 
         // parse CSV data
-        foreach((new Statement())->offset(3)->process($csv)->getRecords() as $i => $record) {
-            $data[ $record[0] ] = $record;
-        }
+        foreach((new Statement())->offset(3)->process($csv)->getRecords() as $row => $record) {
+            $doc = [];
+            foreach ($record as $col => $value) {
+                // skip empty columns
+                if (!isset($sheet->OffsetToColumn[$col])) {
+                    continue;
+                }
 
-        // refactor CSV columns
-        $columns = $this->refactorColumns($columns);
-        unset($csv);
+                $column = $sheet->Columns[$sheet->OffsetToColumn[$col]];
+                $doc[$column->Name] = $value;
 
-        // if this was a locale sheet, get strings from other languages
-        //
-        // - note: This logic will not work for Korean or Chinese as their game data will be of an older
-        //         version and the data offsets will be different
-        if ($locale) {
-            $newColumns = [];
-
-            foreach (['de', 'fr', 'ja'] as $lang) {
-                $filename = str_ireplace('.en', ".{$lang}", $filename);
-
-                // loop through each record
-                $csv = Reader::createFromPath($filename);
-                foreach ((new Statement())->offset(3)->process($csv)->getRecords() as $i => $record) {
-
-                    // loop through each types
-                    foreach ($types as $o => $name) {
-                        // we only care about str type
-                        if ($name === 'str') {
-                            $value  = $record[$o];
-                            $column = str_ireplace('_en', "_{$lang}", $columns[$o]);
-
-                            $data[ $record[0] ][] = $value;
-                            $newColumns[$column] = 'str';
-                        }
+                // if string column
+                if ($locale && $column->Type == 'str') {
+                    // store each translation value
+                    foreach (array_keys($translations) as $language) {
+                        $columnName = str_replace('_en', "_{$language}", $column->Name);
+                        $doc[$columnName] = $translations[$language][$row][$col];
+                        $sheet->Columns[$columnName] = (Object)[
+                            'Name' => $columnName,
+                            'Type' => 'str'
+                        ];
                     }
                 }
             }
 
-            // append new columns and types
-            foreach($newColumns as $name => $type) {
-                $columns[] = $name;
-                $types[] = $type;
-            }
+            // refactor the document data
+            $sheet->Documents[$row] = $doc;
         }
 
-        unset($csv);
+        // finishing touches
+        $sheet->Documents = array_values($sheet->Documents);
+        $sheet->Total     = count($sheet->Documents);
 
-        // clean some of the data
-        [ $data, $columns, $types ] = $this->refactorData($data, $columns, $types);
+        // minor refactoring
+        $this->refactorSheetData($sheet);
 
-        return (Object)[
-            'Columns' => $columns,
-            'Types'   => $types,
-            'Data'    => $data
-        ];
+        unset($csv, $languageCsv, $translations);
+        return $sheet;
     }
 
     /**
@@ -161,15 +179,10 @@ class SaintCsv
     /**
      * Refactor some of the data, for example build correct url paths for images and ensure strict types.
      */
-    private function refactorData(array $data, array $columns, array $types): array
+    private function refactorSheetData(\stdClass $sheet): void
     {
-        $newColumns = [];
-
-        foreach ($data as $i => $d) {
-            foreach ($d as $j => $value) {
-                $type   = $types[$j];
-                $column = $columns[$j];
-
+        foreach ($sheet->Documents as $row => $data) {
+            foreach ($data as $col => $value) {
                 // remove foreign stuff
                 $value = str_ireplace(self::FOREIGN_STRING_REMOVALS, null, $value);
 
@@ -177,31 +190,32 @@ class SaintCsv
                 $value = (strtoupper($value) === 'TRUE') ? true : $value;
                 $value = (strtoupper($value) === 'FALSE') ? false : $value;
 
-                if ($type == 'Image') {
-                    // keep a record of ImageID
-                    $newColumns["{$column}ID"] = $type;
+                //
+                // Handle images by storing the "ID" and then converting the
+                // image into a correct url path
+                //
+                if ($sheet->Columns[$col]->Type == 'Image') {
+                    $colNew = "{$col}ID";
 
-                    $data[$i][] = $value;
-                    $value  = $this->getImagePath($value);
+                    $sheet->Columns[$colNew] = (Object)[
+                        'Name' => $colNew,
+                        'Type' => 'Image'
+                    ];
+
+                    $sheet->Documents[$row][$colNew] = $value;
+                    $value = $this->getImagePath($value);
                 }
 
-                if ($type == 'str') {
-                    // fix new lines (broke around 30th May 2018)
+                //
+                // Minor fixes to strings that broke around 30th May 2018
+                //
+                if ($sheet->Columns[$col]->Type == 'str') {
                     $value = str_ireplace("\r", "\n", $value);
                 }
 
-                // save modified value
-                $data[$i][$j] = $value;
+                $sheet->Documents[$row][$col] = $value;
             }
         }
-
-        // save new columns
-        foreach ($newColumns as $column => $type) {
-            $columns[] = $column;
-            $types[]   = $type;
-        }
-
-        return [ $data, $columns, $types ];
     }
 
     /**

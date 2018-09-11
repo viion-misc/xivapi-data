@@ -3,7 +3,7 @@
 namespace App\Service\Game\Post;
 
 /**
- * Build the game data based on SaintCoinach Ex.JSON
+ * Perform a series of modifications to the data that add easier access, link content, merge sheets or format data.
  */
 class DataPostBuild
 {

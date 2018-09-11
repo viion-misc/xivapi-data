@@ -49,8 +49,9 @@ class AppCommand extends Command
 
             // data
             'GameData: Pre-Build - Preps the game data for data build, must be done before Post-Build',
-            'GameData: Post-Build - Automatically build game data into documents based on SaintCoinach Ex.JSON',
-            'GameData: Custom-Build - Run through a series of custom scripts that extend or modify game data',
+            'GameData: Main-Build - Automatically build game data into documents based on SaintCoinach Ex.JSON',
+            'GameData: Post-Build - Run through a series of custom scripts that extend or modify game data',
+
         ]);
 
         $this->handle([ $choice ]);
@@ -88,13 +89,13 @@ class AppCommand extends Command
                     break;
 
                 case 5:
-                    Tools::Console()->title('GameData: Post-Build');
-                    (new GameData())->PostBuild();
+                    Tools::Console()->title('GameData: Main-Build');
+                    (new GameData())->MainBuild();
                     break;
 
                 case 6:
-                    Tools::Console()->title('GameData: Custom-Build');
-                    (new GameData())->CustomBuild();
+                    Tools::Console()->title('GameData: Post-Build');
+                    (new GameData())->PostBuild();
                     break;
             }
         }

@@ -14,7 +14,7 @@ class DataPreBuild
      * Serialize all CSV documents, this is for quicker access as PHP CSV loading is very slow
      * and very memory hungry. This will also convert column names to a simplified format.
      */
-    public function serializeCsvDocuments()
+    public function processCsvSerialization()
     {
         Tools::Timer()->start();
         Tools::Console()->section('Serialize CSV Documents');
@@ -34,14 +34,14 @@ class DataPreBuild
             $start     = microtime(true);
             $sheetName = str_pad($sheet->sheet, 50, ' ', STR_PAD_RIGHT);
 
-            $data = Tools::SaintCsv()->get('Achievement');
+            $document = Tools::SaintCsv()->get($sheet->sheet);
 
             // append on default column and sheet definitions
-            $data->DefaultColumn = $sheet->defaultColumn ?? null;
-            $data->Definitions   = $sheet->definitions;
+            $document->DefaultColumn = $sheet->defaultColumn ?? null;
+            $document->Definitions   = $sheet->definitions;
 
             // serialize and save
-            file_put_contents(__DIR__ . "/../data/{$sheet->sheet}.serialize", serialize($data));
+            file_put_contents(__DIR__ . "/../data/{$sheet->sheet}", serialize($document));
             unset($data);
 
             $duration = str_pad(round(microtime(true) - $start, 3) ." sec", 10);
@@ -61,5 +61,77 @@ class DataPreBuild
             Tools::Memory()->report(),
             ''
         ]);
+
+        return $this;
+    }
+
+    /**
+     * Some content needs a search result
+     */
+    public function processMinionAndMountLargeIcons()
+    {
+        // the folder paths to replace to access the "large" icon
+        $rep = [
+            '/004' => '/068',
+            '/008' => '/077',
+        ];
+
+        foreach (['Companion', 'Mount'] as $contentName) {
+            $document = unserialize(file_get_contents(__DIR__."/../data/{$contentName}"));
+            $document->Columns['IconLarge'] = (Object)[
+                'Name' => 'IconLarge',
+                'Type' => 'Image',
+            ];
+
+            // add each large icon
+            foreach ($document->Documents as $row => $data) {
+                $document->Documents[$row]['IconLarge'] = str_ireplace(array_keys($rep), $rep, $data['Icon']);
+            }
+
+            // save
+            file_put_contents(__DIR__ . "/../data/{$contentName}", serialize($document));
+            unset($document);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add map images to map content
+     */
+    public function processMapImages()
+    {
+        $document = unserialize(file_get_contents(__DIR__."/../data/Map"));
+        $document->Columns['FileImage'] = (Object)[
+            'Name' => 'FileImage',
+            'Type' => 'Image',
+        ];
+
+        foreach ($document->Documents as $row => $data) {
+            if (empty($data['File_en'])) {
+                continue;
+            }
+
+            [$folder, $layer] = explode('/', $data['File_en']);
+            $document->Documents[$row]['FileImage'] = "/m/{$folder}/{$folder}.{$layer}.jpg";
+        }
+    }
+
+    /**
+     * Set quest icons and move the current "Icon" to "Banner"
+     */
+    public function processQuestIcons()
+    {
+        // todo (v3 = setQuestIcons)
+        return $this;
+    }
+
+    /**
+     * Copy the ResultItem icon to the main Recipe itself
+     */
+    public function processRecipeIcons()
+    {
+        // todo (v3 = setRecipeIcon)
+        return $this;
     }
 }
