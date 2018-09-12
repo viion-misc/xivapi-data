@@ -58,6 +58,10 @@ class GameData
      */
     public static function loadDocument(string $filename)
     {
+        if (!file_exists(self::ROOT . $filename)) {
+            return null;
+        }
+
         return unserialize(file_get_contents(self::ROOT . $filename));
     }
 

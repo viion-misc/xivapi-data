@@ -47,11 +47,15 @@ class SaintCsv
     /**
      * Returns a class document with the CSV data
      */
-    public function get(string $filename): \stdClass
+    public function get(string $filename, bool $keepUnknownColumns = false): \stdClass
     {
         // get full filename from version
         $versions = (new SaintCoinach())->versions(true);
         $filename = "{$versions->FolderPath}/raw-exd-all/{$filename}";
+
+        if (!file_exists($filename)) {
+            return null;
+        }
 
         // check if this is a multi language file or not.
         $locale   = file_exists("{$filename}.en.csv");
@@ -77,7 +81,9 @@ class SaintCsv
         // store columns against type
         foreach ($columns as $i => $col) {
             // ignore non-named columns
-            if (empty($col)) continue;
+            if (empty($col) && !$keepUnknownColumns) continue;
+
+            $col = empty($col) ? "UnknownColumn{$i}" : $col;
 
             $type = $types[$i];
             $col  = $type == 'str' ? "{$col}_en" : $col;

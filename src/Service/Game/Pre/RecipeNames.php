@@ -8,7 +8,7 @@ use App\Service\Tools\Console;
 use App\Service\Tools\Tools;
 
 /**
- * Copy RewardItem icon to the Recipe so there is an icon at base level
+ * Copy RewardItem names to the Recipe name
  */
 class RecipeNames
 {

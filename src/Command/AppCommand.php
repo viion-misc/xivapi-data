@@ -32,7 +32,7 @@ class AppCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        Tools::Console()->set($input, $output)->title('Welcome');
+        Tools::Console()->set($input, $output)->title('XIVAPI REST API Data Builder');
         Tools::Console()->text( Tools::Memory()->report() );
 
         // if we're in auto mode.
