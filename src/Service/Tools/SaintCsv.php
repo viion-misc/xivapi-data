@@ -143,6 +143,9 @@ class SaintCsv
         $this->refactorSheetData($sheet);
 
         unset($csv, $languageCsv, $translations);
+
+        // converting to ensure everything is a stdclass
+        $sheet = json_decode(json_encode($sheet));
         return $sheet;
     }
 
@@ -221,7 +224,7 @@ class SaintCsv
     /**
      * Gets the real path to an image
      */
-    private function getImagePath($number): ?string
+    public function getImagePath($number): ?string
     {
         $number = intval($number);
         $extended = (strlen($number) >= 6);

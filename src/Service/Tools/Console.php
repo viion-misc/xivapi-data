@@ -54,7 +54,7 @@ class Console
      */
     public function section($section)
     {
-        $this->io->text([ "<fg=magenta>:: {$section} ::</>", '' ]);
+        $this->io->text([ "<fg=magenta>:: {$section}</>", '' ]);
         return $this;
     }
 
