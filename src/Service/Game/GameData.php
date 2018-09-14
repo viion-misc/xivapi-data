@@ -130,4 +130,12 @@ class GameData
 
         return $list;
     }
+
+    /**
+     * Returns a list of available documents
+     */
+    public static function getDocumentList()
+    {
+        return Tools::FileManager()->listDirectory(self::ROOT);
+    }
 }

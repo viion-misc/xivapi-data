@@ -12,3 +12,10 @@ src/Service/Github/data
 /public/bundles/
 /var/
 /vendor/
+
+#
+# ZendStudio
+#
+/.buildpath
+/.project
+/.settings*
