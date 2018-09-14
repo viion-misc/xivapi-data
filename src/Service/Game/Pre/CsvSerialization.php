@@ -12,13 +12,16 @@ use App\Service\Tools\Tools;
  */
 class CsvSerialization
 {
-    const ENABLED = false;
+    const ENABLED = true;
     const ORDER = 1;
 
     public function handle()
     {
         // Create the storage directory
         Tools::FileManager()->createDirectory(GameData::ROOT);
+        
+        $versions = (new SaintCoinach())->versions();
+        print_r($versions);
 
         // Get SaintCoinach Sheet data
         $sheets  = (new SaintCoinach())->sheets();

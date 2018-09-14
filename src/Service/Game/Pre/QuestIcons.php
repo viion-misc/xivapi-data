@@ -10,7 +10,7 @@ use App\Service\Tools\Tools;
  */
 class QuestIcons
 {
-    const ENABLED = false;
+    const ENABLED = true;
     const ORDER = 100;
 
     public function handle()

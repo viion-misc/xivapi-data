@@ -9,7 +9,7 @@ use App\Service\Game\GameData;
  */
 class MapFileImages
 {
-    const ENABLED = false;
+    const ENABLED = true;
     const ORDER = 100;
 
     public function handle()

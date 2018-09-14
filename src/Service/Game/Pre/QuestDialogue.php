@@ -10,7 +10,7 @@ use App\Service\Tools\Tools;
  */
 class QuestDialogue
 {
-    const ENABLED = false;
+    const ENABLED = true;
     const ORDER = 150;
 
     private $ENpcResidentToName = [];

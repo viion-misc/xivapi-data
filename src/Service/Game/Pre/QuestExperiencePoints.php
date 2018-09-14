@@ -9,7 +9,7 @@ use App\Service\Game\GameData;
  */
 class QuestExperiencePoints
 {
-    const ENABLED = false;
+    const ENABLED = true;
     const ORDER = 100;
 
     public function handle()

@@ -30,10 +30,7 @@ class SaintCoinach
         }
 
         // create data directory if it does not exist
-        if (!is_dir(self::ROOT)) {
-            mkdir(self::ROOT);
-        }
-        
+        Tools::FileManager()->createDirectory(self::ROOT);
         $filename = self::ROOT . '/' . $build['name'];
         
         Tools::Console()->text([
@@ -68,7 +65,8 @@ class SaintCoinach
         $bat[] = "cd ". self::ROOT . '/App';
         $bat[] = "del {$history}";
         $bat[] = "{$exe} \"". getenv('APP_FFXIV_PATH') ."\" %s";
-        $bat = implode("\n", $bat);;
+        $bat = implode("\n", $bat);
+        $bat = str_ireplace('/', '\\', $bat);
     
         // save bat scripts
         Tools::FileManager()->save("{$appRoot}/extract-allrawexd.bat", sprintf($bat, 'allrawexd'));
