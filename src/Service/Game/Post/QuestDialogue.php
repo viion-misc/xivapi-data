@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Game\Pre;
+namespace App\Service\Game\Post;
 
 use App\Service\Game\GameData;
 use App\Service\Tools\Tools;
@@ -11,7 +11,7 @@ use App\Service\Tools\Tools;
 class QuestDialogue
 {
     const ENABLED = true;
-    const ORDER = 150;
+    const ORDER = 1000;
 
     private $ENpcResidentToName = [];
     private $ENpcResidentToData = [];

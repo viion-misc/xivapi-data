@@ -74,6 +74,14 @@ class GameData
 
         return unserialize(file_get_contents(self::ROOT . $filename));
     }
+    
+    /**
+     * Returns a list of available documents
+     */
+    public static function getDocumentList()
+    {
+        return Tools::FileManager()->listDirectory(self::ROOT);
+    }
 
     /**
      * Process data BEFORE building document trees
@@ -102,6 +110,19 @@ class GameData
      */
     public function MainBuild()
     {
+        Tools::Timer()->start();
+        foreach ($this->getClassList(__DIR__.'/Main') as $class => $priority) {
+            Tools::Console()->section("[{$priority}] $class");
+            (new $class())->handle();
+        }
+    
+        Tools::Console()->text([
+            '',
+            'CSV Pre-Process has completed.',
+            Tools::Timer()->stop(),
+            Tools::Memory()->report(),
+            ''
+        ]);
     }
 
     /**
@@ -109,6 +130,19 @@ class GameData
      */
     public function PostBuild()
     {
+        Tools::Timer()->start();
+        foreach ($this->getClassList(__DIR__.'/Post') as $class => $priority) {
+            Tools::Console()->section("[{$priority}] $class");
+            (new $class())->handle();
+        }
+    
+        Tools::Console()->text([
+            '',
+            'CSV Post-Process has completed.',
+            Tools::Timer()->stop(),
+            Tools::Memory()->report(),
+            ''
+        ]);
     }
 
     /**
@@ -139,13 +173,5 @@ class GameData
         }
 
         return $list;
-    }
-
-    /**
-     * Returns a list of available documents
-     */
-    public static function getDocumentList()
-    {
-        return Tools::FileManager()->listDirectory(self::ROOT);
     }
 }
