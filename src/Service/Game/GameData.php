@@ -44,7 +44,7 @@ class GameData
     {
         $arr = [];
         foreach ($document->Documents as $doc) {
-            if($groupUp){
+            if ($groupUp) {
                 $arr[$doc->{$field}][] = $doc;
             } else {
                 $arr[$doc->{$field}] = $doc;
