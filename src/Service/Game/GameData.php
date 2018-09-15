@@ -33,12 +33,22 @@ class GameData
      *
      *      $item = $itemDocument[1675];
      *      --> Curtana data
+     *
+     *
+     *      $itemDocument = GameData::getDocumentsByField($itemDocument, 'LevelEquip', true);
+     *
+     *      $items = $itemDocument[50];
+     *      --> Collection of all items with LevelEquip of 50
      */
-    public static function getDocumentsByField($document, $field)
+    public static function getDocumentsByField($document, $field, bool $groupUp = false)
     {
         $arr = [];
         foreach ($document->Documents as $doc) {
-            $arr[$doc->{$field}] = $doc;
+            if ($groupUp) {
+                $arr[$doc->{$field}][] = $doc;
+            } else {
+                $arr[$doc->{$field}] = $doc;
+            }
         }
 
         return $arr;
