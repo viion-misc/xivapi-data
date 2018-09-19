@@ -78,7 +78,7 @@ class GameData
     /**
      * Returns a list of available documents
      */
-    public static function getDocumentList()
+    public static function getDocumentList(): array
     {
         return Tools::FileManager()->listDirectory(self::ROOT);
     }
@@ -86,59 +86,50 @@ class GameData
     /**
      * Process data BEFORE building document trees
      */
-    public function PreBuild()
+    public function preBuild(): void
     {
-        Tools::Timer()->start();
-
-        foreach ($this->getClassList(__DIR__.'/Pre') as $class => $priority) {
-            Tools::Console()->section("[{$priority}] $class");
-            (new $class())->handle();
-        }
-
-        Tools::Console()->text([
-            '',
-            'CSV Pre-Process has completed.',
-            'This action does not need to be run every time, only on game updates',
-            Tools::Timer()->stop(),
-            Tools::Memory()->report(),
-            ''
-        ]);
+        $this->handleBuild('Pre');
     }
 
     /**
      * Process data into multi depth document trees
      */
-    public function MainBuild()
+    public function mainBuild(): void
     {
-        Tools::Timer()->start();
-        foreach ($this->getClassList(__DIR__.'/Main') as $class => $priority) {
-            Tools::Console()->section("[{$priority}] $class");
-            (new $class())->handle();
-        }
-    
-        Tools::Console()->text([
-            '',
-            'CSV Pre-Process has completed.',
-            Tools::Timer()->stop(),
-            Tools::Memory()->report(),
-            ''
-        ]);
+        $this->handleBuild('Main');
     }
 
     /**
      * Process data AFTER building document trees
      */
-    public function PostBuild()
+    public function postBuild(): void
+    {
+        $this->handleBuild('Post');
+    }
+
+    /**
+     * Process data to deployment pipelines!
+     */
+    public function deployBuild(): void
+    {
+        $this->handleBuild('Deploy');
+    }
+
+    /**
+     * handle a build pipeline
+     */
+    private function handleBuild(string $type): void
     {
         Tools::Timer()->start();
-        foreach ($this->getClassList(__DIR__.'/Post') as $class => $priority) {
+
+        foreach ($this->getClassList($type, __DIR__ .'/'. $type) as $class => $priority) {
             Tools::Console()->section("[{$priority}] $class");
             (new $class())->handle();
         }
-    
+
         Tools::Console()->text([
             '',
-            'CSV Post-Process has completed.',
+            "Game Data: {$type} - Complete",
             Tools::Timer()->stop(),
             Tools::Memory()->report(),
             ''
@@ -148,7 +139,7 @@ class GameData
     /**
      * Get the class list ordered by the constant ORDER in the class file.
      */
-    public function getClassList($folder)
+    private function getClassList($type, $folder): array
     {
         $list = [];
         foreach (Tools::FileManager()->listDirectory($folder) as $file) {
@@ -161,7 +152,7 @@ class GameData
             //  the typehint here is to be helpful.
             /** @var CsvSerialization $classNamespace */
             $className = $info['filename'];
-            $classNamespace = "\\App\\Service\\Game\\Pre\\{$className}";
+            $classNamespace = "\\App\\Service\\Game\\{$type}\\{$className}";
 
             // ignore non-enabled converters
             if (!$classNamespace::ENABLED) {

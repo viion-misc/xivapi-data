@@ -12,7 +12,7 @@ use App\Service\Tools\Tools;
  */
 class TransientMerger
 {
-    const ENABLED = true;
+    const ENABLED = false;
     const ORDER = 50;
 
     public function handle()

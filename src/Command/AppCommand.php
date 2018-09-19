@@ -84,17 +84,22 @@ class AppCommand extends Command
 
                 case 4:
                     Tools::Console()->title('GameData: Pre-Build');
-                    (new GameData())->PreBuild();
+                    (new GameData())->preBuild();
                     break;
 
                 case 5:
                     Tools::Console()->title('GameData: Main-Build');
-                    (new GameData())->MainBuild();
+                    (new GameData())->mainBuild();
                     break;
 
                 case 6:
                     Tools::Console()->title('GameData: Post-Build');
-                    (new GameData())->PostBuild();
+                    (new GameData())->postBuild();
+                    break;
+
+                case 6:
+                    Tools::Console()->title('GameData: Deploy-Build');
+                    (new GameData())->deployBuild();
                     break;
             }
         }

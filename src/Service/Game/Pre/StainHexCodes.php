@@ -12,7 +12,7 @@ use App\Service\Tools\Tools;
  */
 class StainHexCodes
 {
-    const ENABLED = true;
+    const ENABLED = false;
     const ORDER = 100;
 
     public function handle()

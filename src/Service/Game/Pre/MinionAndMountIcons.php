@@ -9,7 +9,7 @@ use App\Service\Game\GameData;
  */
 class MinionAndMountIcons
 {
-    const ENABLED = true;
+    const ENABLED = false;
     const ORDER = 100;
 
     public function handle()

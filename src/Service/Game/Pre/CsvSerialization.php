@@ -12,7 +12,7 @@ use App\Service\Tools\Tools;
  */
 class CsvSerialization
 {
-    const ENABLED = true;
+    const ENABLED = false;
     const ORDER = 1;
 
     public function handle()
