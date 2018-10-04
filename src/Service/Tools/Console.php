@@ -90,4 +90,9 @@ class Console
     {
         return $this->io->confirm($text);
     }
+
+    public function line()
+    {
+        return $this->io->newLine();
+    }
 }

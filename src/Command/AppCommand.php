@@ -97,7 +97,7 @@ class AppCommand extends Command
                     (new GameData())->postBuild();
                     break;
 
-                case 6:
+                case 7:
                     Tools::Console()->title('GameData: Deploy-Build');
                     (new GameData())->deployBuild();
                     break;

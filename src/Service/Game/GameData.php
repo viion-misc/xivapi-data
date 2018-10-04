@@ -12,6 +12,8 @@ class GameData
 {
     const ROOT = __DIR__ .'/data/';
 
+    private static $cacheDocuments = [];
+
     /**
      * Add a column to the document Columns list
      */
@@ -59,8 +61,22 @@ class GameData
      */
     public static function saveDocument(string $filename, $document): void
     {
+        Tools::FileManager()->createDirectory(
+            self::ROOT . pathinfo($filename)['dirname']
+        );
+
         file_put_contents(self::ROOT . $filename, serialize($document));
         unset($document);
+    }
+
+    public static function savePreDocument(string $filename, $document): void
+    {
+        self::saveDocument("pre/{$filename}", $document);
+    }
+
+    public static function savePostDocument(string $filename, $document): void
+    {
+        self::saveDocument("post/{$filename}", $document);
     }
 
     /**
@@ -72,7 +88,26 @@ class GameData
             return null;
         }
 
-        return unserialize(file_get_contents(self::ROOT . $filename));
+        // check run-time cache
+        if (isset(self::$cacheDocuments[$filename])) {
+            return self::$cacheDocuments[$filename];
+        }
+
+        // grab document and cache it in memory for runtime
+        $document = unserialize(file_get_contents(self::ROOT . $filename));
+        self::$cacheDocuments[$filename] = $document;
+
+        return $document;
+    }
+
+    public static function loadPreDocument(string $filename)
+    {
+        return self::loadDocument("pre/{$filename}");
+    }
+
+    public static function loadPostDocument(string $filename)
+    {
+        return self::loadDocument("post/{$filename}");
     }
     
     /**

@@ -12,8 +12,14 @@ use App\Service\Tools\Tools;
  */
 class CsvSerialization
 {
-    const ENABLED = false;
+    const ENABLED = true;
     const ORDER = 1;
+
+    const ZERO_CONTENT = [
+        'GatheringType',
+        'Cabinet',
+        'World'
+    ];
 
     public function handle()
     {
@@ -32,15 +38,26 @@ class CsvSerialization
             $current++;
             $start     = microtime(true);
             $sheetName = str_pad($sheet->sheet, 50, ' ', STR_PAD_RIGHT);
+            $document  = Tools::SaintCsv()->get($sheet->sheet);
 
-            $document = Tools::SaintCsv()->get($sheet->sheet);
+            // remove the 0 entry from all documents that are not in the
+            // zero content list, this is because SE will often use 0 as
+            // a default value, causing auto-linking of content to spiral
+            // out of control.
+            if (!in_array($sheet->sheet, self::ZERO_CONTENT)) {
+                foreach ($document->Documents as $j => $doc) {
+                    if ((int)$doc->ID === 0) {
+                        unset($document->Documents[$j]); break;
+                    }
+                }
+            }
 
             // append on default column and sheet definitions
             $document->DefaultColumn = $sheet->defaultColumn ?? null;
             $document->Definitions   = $sheet->definitions;
 
             // serialize and save
-            GameData::saveDocument($sheet->sheet, $document);
+            GameData::savePreDocument($sheet->sheet, $document);
             unset($data);
 
             $duration = str_pad(round(microtime(true) - $start, 3) ." sec", 10);

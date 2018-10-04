@@ -155,6 +155,24 @@ class SaintCsv
         return $sheet;
     }
 
+    public function refactorColumnName(string $column)
+    {
+        // remove all symbols
+        $column = str_replace(array_keys(self::COLUMN_NAME_SYMBOLS), self::COLUMN_NAME_SYMBOLS, $column);
+
+        // uppercase each word
+        $column = str_ireplace(' ', null, ucwords($column));
+
+        // rename some columns
+        $column = str_replace(
+            array_keys(self::COLUMN_NAME_REPLACEMENTS),
+            self::COLUMN_NAME_REPLACEMENTS,
+            $column
+        );
+
+        return $column;
+    }
+
     /**
      * Refactor and rename the CSV columns, eg:
      *
