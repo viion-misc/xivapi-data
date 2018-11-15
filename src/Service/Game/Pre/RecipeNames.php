@@ -17,11 +17,8 @@ class RecipeNames
 
     public function handle()
     {
-        $document = GameData::loadDocument('Recipe');
-        $itemDocument = GameData::loadDocument('Item');
-
-        // convert for easy access
-        $itemDocument = GameData::getDocumentsByField($itemDocument, 'ID');
+        $document     = GameData::loadPreDocument('Recipe');
+        $itemDocument = GameData::getDocumentsByField(GameData::loadPreDocument('Item'), 'ID');
 
         // add columns
         GameData::addColumn($document, 'Name_en', 'string');
@@ -44,6 +41,6 @@ class RecipeNames
             $recipe->Name_ja = $item->Name_ja;
         }
 
-        GameData::saveDocument('Recipe', $document);
+        GameData::savePreDocument('Recipe', $document);
     }
 }

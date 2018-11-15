@@ -17,7 +17,7 @@ class StainHexCodes
 
     public function handle()
     {
-        $document = GameData::loadDocument('Stain');
+        $document = GameData::loadPreDocument('Stain');
 
         // add columns
         GameData::addColumn($document, 'Hex', 'string');
@@ -25,6 +25,6 @@ class StainHexCodes
             $stain->Hex = str_pad(dechex($stain->Color), 6, '0', STR_PAD_LEFT);
         }
 
-        GameData::saveDocument('Stain', $document);
+        GameData::savePreDocument('Stain', $document);
     }
 }

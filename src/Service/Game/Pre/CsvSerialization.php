@@ -9,6 +9,8 @@ use App\Service\Tools\Tools;
 /**
  * Serialize all CSV documents, this is for quicker access as PHP CSV loading is very slow
  * and very memory hungry. This will also convert column names to a simplified format.
+ *
+ * This needs to run first. ORDER =1
  */
 class CsvSerialization
 {

@@ -20,7 +20,7 @@ class QuestDialogue
     {
         $this->warmENpcResidents();
 
-        $questDocument = GameData::loadDocument('Quest');
+        $questDocument = GameData::loadPreDocument('Quest');
 
         // add the new experience points column
         GameData::addColumn($questDocument, 'TextData_en', 'array');
@@ -174,13 +174,13 @@ class QuestDialogue
             }
         }
 
-        //GameData::saveDocument('Quest', $questDocument);
+        //GameData::savePreDocument('Quest', $questDocument);
         unset($questTextData);
     }
 
     private function warmENpcResidents()
     {
-        foreach (GameData::loadDocument('ENpcResident')->Documents as $npc) {
+        foreach (GameData::loadPreDocument('ENpcResident')->Documents as $npc) {
             $name = preg_replace('/[0-9]+/', null, str_ireplace(' ', null, strtolower($npc->Name_en)));
 
             if (isset($this->ENpcResidentToName[$name])) {

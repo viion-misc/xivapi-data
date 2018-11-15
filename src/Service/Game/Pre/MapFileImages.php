@@ -14,7 +14,7 @@ class MapFileImages
 
     public function handle()
     {
-        $document = GameData::loadDocument('Map');
+        $document = GameData::loadPreDocument('Map');
 
         // add column
         GameData::addColumn($document, 'FileImage', 'Image');
@@ -29,7 +29,7 @@ class MapFileImages
             $document->Documents[$row]->FileImage = "/m/{$folder}/{$folder}.{$layer}.jpg";
         }
 
-        GameData::saveDocument('Map', $document);
+        GameData::savePreDocument('Map', $document);
     }
 }
 

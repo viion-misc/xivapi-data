@@ -15,8 +15,8 @@ class QuestIcons
 
     public function handle()
     {
-        $document = GameData::loadDocument('Quest');
-        $journalGenreDocument = GameData::loadDocument('JournalGenre');
+        $document = GameData::loadPreDocument('Quest');
+        $journalGenreDocument = GameData::loadPreDocument('JournalGenre');
 
         // add columns
         GameData::addColumn($document, 'Banner', 'Image');
@@ -70,6 +70,6 @@ class QuestIcons
             }
         }
 
-        GameData::saveDocument('Quest', $document);
+        GameData::savePreDocument('Quest', $document);
     }
 }

@@ -17,11 +17,8 @@ class RecipeIcons
 
     public function handle()
     {
-        $document = GameData::loadDocument('Recipe');
-        $itemDocument = GameData::loadDocument('Item');
-
-        // convert for easy access
-        $itemDocument = GameData::getDocumentsByField($itemDocument, 'ID');
+        $document     = GameData::loadPreDocument('Recipe');
+        $itemDocument = GameData::getDocumentsByField(GameData::loadPreDocument('Item'), 'ID');
 
         // add columns
         GameData::addColumn($document, 'Icon', 'Image');
@@ -40,6 +37,6 @@ class RecipeIcons
             $recipe->IconID = $item->IconID;
         }
 
-        GameData::saveDocument('Recipe', $document);
+        GameData::savePreDocument('Recipe', $document);
     }
 }

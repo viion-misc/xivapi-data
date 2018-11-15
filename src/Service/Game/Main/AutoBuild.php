@@ -12,13 +12,18 @@ class AutoBuild
     const ORDER   = 1;
     const LOOPS   = 2;
 
+    // Self linking is when a definition links back on itself, eg:
+    // ClassJob #1 (Gladiator), Field: ClassJobParent = ClassJob #1 (Gladiator).
+    const OPTION_ALLOW_SELF_LINKING = false;
+
+    /** @var int */
+    private $currentLoop = 0;
+
     public function handle()
     {
-        Tools::Console()->title('Building Game Data');
-
         foreach(range(1, self::LOOPS) as $loop) {
-            $this->runLoop($loop);
-            break;
+            $this->currentLoop = $loop;
+            $this->runLoop();
         }
     }
 
@@ -26,26 +31,32 @@ class AutoBuild
      * todo - find a better name
      * Run loop
      */
-    private function runLoop($loop)
+    private function runLoop()
     {
-        Tools::Console()->title("- AutoBuild Loop: {$loop}");
+        Tools::Console()->title("- AutoBuild Loop: {$this->currentLoop}");
 
         // loop through each SaintCoinach ex.json sheet
         foreach ((new SaintCoinach())->sheets() as $i => $sheet) {
-            Tools::Console()->section("- Sheet: {$sheet->sheet}");
+            Tools::Console()->text("<info>[{$this->currentLoop}] - Sheet: {$sheet->sheet}</info>");
 
             // grab sheet document, if it's first iteration grab pre document (to start fresh)
-            $document = ($loop == 1)
+            $document = ($this->currentLoop == 1)
                 ? GameData::loadPreDocument($sheet->sheet)
                 : GameData::loadPostDocument($sheet->sheet);
 
-            // todo (note) save a before
-            if (!file_exists(__DIR__.'/before.json') || $sheet->sheet == 'Achievement') {
-                file_put_contents(__DIR__.'/before.json', json_encode($document, JSON_PRETTY_PRINT));
+
+            if ($this->currentLoop == 1 && $sheet->sheet == 'Achievement') {
+                file_put_contents(__DIR__.'/Achievement_BEFORE.json', json_encode($document, JSON_PRETTY_PRINT));
             }
 
             // grab sheet definitions
-            $definitions = $document->Definitions;
+            $definitions = $document->Definitions ?? null;
+
+            if (!isset($document->Definitions)) {
+                file_put_contents(__DIR__."/no_definitions_{$this->currentLoop}_{$sheet->sheet}.json", json_encode($document, JSON_PRETTY_PRINT));
+                throw new \Exception("No definitions defined");
+                #continue;
+            }
 
             // process definitions
             foreach ($definitions as $definition) {
@@ -66,7 +77,7 @@ class AutoBuild
                             break;
 
                         case 'link':
-                            $this->handleLink($document, $definition);
+                            $this->handleLink($document, $definition, $sheet->sheet);
                             break;
 
                         case 'complexlink':
@@ -101,9 +112,11 @@ class AutoBuild
                 }
             }
 
+            // save document with new linked data
+            GameData::savePostDocument($sheet->sheet, $document);
+
             if ($sheet->sheet == 'Achievement') {
-                // todo (note) save a after
-                file_put_contents(__DIR__.'/after.json', json_encode($document, JSON_PRETTY_PRINT));
+                file_put_contents(__DIR__.'/Achievement_AFTER.json', json_encode($document, JSON_PRETTY_PRINT));
             }
 
             Tools::Console()->line();
@@ -112,14 +125,16 @@ class AutoBuild
         Tools::Console()->line();
     }
 
-    private function handleLink($document, $definition)
+    private function handleLink($document, $definition, $sheetName)
     {
         $targetSheet     = $definition->converter->target;
         $targetName      = Tools::SaintCsv()->refactorColumnName($definition->name);
 
-        Tools::Console()->text("Link: {$targetName} to {$targetSheet}");
+        Tools::Console()->text("[{$this->currentLoop}] Link: {$targetName} to {$targetSheet}");
 
-        $targetDocuments = GameData::loadPreDocument($targetSheet);
+        $targetDocuments = ($this->currentLoop == 1)
+            ? GameData::loadPreDocument($targetSheet)
+            : GameData::loadPostDocument($targetSheet);
 
         if (!$targetDocuments) {
             // This is expected, we can find links but nothing in the file can be known, eg:
@@ -133,13 +148,31 @@ class AutoBuild
 
         // process documents
         foreach ($document->Documents as $doc) {
+            if (!property_exists($doc, $targetName)) {
+                Tools::Console()->text('Could not find: '. $targetName .' on doc');
+                print_r($doc);
+                die('no definition?');
+            }
+
             // grab id
             $targetId = is_object($doc->{$targetName}) ? $doc->{$targetName}->ID : $doc->{$targetName};
 
-            // store the target sheet name, ID and then the value from the target documents
+            // add Target and TargetID
             $doc->{$targetName . "Target"}  = $targetSheet;
             $doc->{$targetName . "ID"}      = $targetId;
-            $doc->{$targetName}             = $targetDocuments[ $targetId ] ?? null;
+            $doc->{$targetName}             = null;
+
+            // todo - decide if self-linking should be a thing
+            // don't link to itself, example of this happening is ClassJobs where the
+            // base classes (Gladiator, Pugilist, etc) will link back to themselves, rather than 0.
+            // however advanced glasses eg Summoner will link to their parent class as expected (Arcanist).
+            // Can cause duplicate information.
+            if (!self::OPTION_ALLOW_SELF_LINKING && $doc->ID === $targetId && $sheetName === $targetSheet) {
+                continue;
+            }
+
+            // store the target sheet name, ID and then the value from the target documents
+            $doc->{$targetName} = $targetDocuments[ $targetId ] ?? null;
         }
     }
 

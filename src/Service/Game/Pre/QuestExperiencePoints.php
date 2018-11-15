@@ -14,8 +14,8 @@ class QuestExperiencePoints
 
     public function handle()
     {
-        $questDocument      = GameData::loadDocument('Quest');
-        $paramGrowDocument  = GameData::loadDocument('ParamGrow');
+        $questDocument      = GameData::loadPreDocument('Quest');
+        $paramGrowDocument  = GameData::loadPreDocument('ParamGrow');
 
         // add the new experience points column
         GameData::addColumn($questDocument, 'ExperiencePoints', 'int');
@@ -56,6 +56,6 @@ class QuestExperiencePoints
             $questDocument->Documents[$i]->ExperiencePoints = $EXP;
         }
 
-        GameData::saveDocument('Quest', $questDocument);
+        GameData::savePreDocument('Quest', $questDocument);
     }
 }

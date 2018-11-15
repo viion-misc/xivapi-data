@@ -21,7 +21,7 @@ class MinionAndMountIcons
         ];
 
         foreach (['Companion', 'Mount'] as $contentName) {
-            $document = GameData::loadDocument($contentName);
+            $document = GameData::loadPreDocument($contentName);
 
             // add column
             GameData::addColumn($document, 'IconLarge', 'Image');
@@ -32,7 +32,7 @@ class MinionAndMountIcons
             }
 
             // save
-            GameData::saveDocument($contentName, $document);
+            GameData::savePreDocument($contentName, $document);
             unset($document);
         }
     }

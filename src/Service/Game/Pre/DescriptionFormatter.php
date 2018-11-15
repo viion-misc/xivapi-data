@@ -7,7 +7,7 @@ use App\Service\Github\SaintCoinach;
 use App\Service\Tools\Tools;
 
 /**
- * Converts descriptions into JSON and MaxLevel variants as well as
+ * Converts transient descriptions into JSON and MaxLevel variants as well as
  * converts colour codes to their correct hex values.
  */
 class DescriptionFormatter
@@ -28,13 +28,13 @@ class DescriptionFormatter
         foreach ((new SaintCoinach())->sheets() as $i => $sheet) {
             // look for a transient file
             $transientSheetName = "{$sheet->sheet}Transient";
-            $transientData = GameData::loadDocument($transientSheetName);
+            $transientData = GameData::loadPreDocument($transientSheetName);
             if (!$transientData) {
                 continue;
             }
 
             // grab the base document
-            $document = GameData::loadDocument($sheet->sheet);
+            $document = GameData::loadPreDocument($sheet->sheet);
             if (!$document) {
                 continue;
             }
@@ -58,7 +58,7 @@ class DescriptionFormatter
             }
 
             // save document
-            GameData::saveDocument($sheet->sheet, $document);
+            GameData::savePreDocument($sheet->sheet, $document);
         }
     }
 

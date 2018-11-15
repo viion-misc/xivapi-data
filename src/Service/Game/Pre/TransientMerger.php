@@ -21,13 +21,13 @@ class TransientMerger
         foreach ((new SaintCoinach())->sheets() as $i => $sheet) {
             // look for a transient file
             $transientSheetName = "{$sheet->sheet}Transient";
-            $transientData = GameData::loadDocument($transientSheetName);
+            $transientData = GameData::loadPreDocument($transientSheetName);
             if (!$transientData) {
                 continue;
             }
 
             // grab the base document
-            $document = GameData::loadDocument($sheet->sheet);
+            $document = GameData::loadPreDocument($sheet->sheet);
             if (!$document) {
                 continue;
             }
@@ -51,7 +51,7 @@ class TransientMerger
             }
 
             // save document
-            GameData::saveDocument($sheet->sheet, $document);
+            GameData::savePreDocument($sheet->sheet, $document);
         }
     }
 }
